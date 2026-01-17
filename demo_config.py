@@ -64,8 +64,7 @@ print(f"NOTE: Training on {num_tokens} tokens")
 
 eval_num_inputs = 200
 random_seeds = [0]
-dictionary_widths = [2**14, 2**16]
-# dictionary_widths = [2**14]
+dictionary_widths = [2**12, 2**14, 2**16]  # 4k, 16k, 64k
 
 WARMUP_STEPS = 1000
 SPARSITY_WARMUP_STEPS = 5000
@@ -77,7 +76,7 @@ max_activation_norm_multiple = 10
 learning_rates = [5e-5]
 
 
-wandb_project = "qwen-8b-sweep"
+wandb_project = "pythia-160m"
 
 LLM_CONFIG = {
     "EleutherAI/pythia-70m-deduped": LLMConfig(
@@ -110,9 +109,7 @@ SPARSITY_PENALTIES = SparsityPenalties(
     gated=[0.012, 0.018, 0.024, 0.04, 0.06, 0.08],
 )
 
-
-TARGET_L0s = [80, 160]
-# TARGET_L0s = [20, 40, 80, 160, 320, 640]
+TARGET_L0s = [20, 40, 80, 160, 320, 640]
 
 
 @dataclass

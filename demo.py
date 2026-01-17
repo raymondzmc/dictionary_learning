@@ -66,6 +66,15 @@ def get_args():
     parser.add_argument(
         "--mixed_dataset", action="store_true", help="use mixed dataset"
     )
+    parser.add_argument(
+        "--wandb_entity", type=str, help="Weights & Biases entity (overrides demo_config)"
+    )
+    parser.add_argument(
+        "--wandb_project", type=str, help="Weights & Biases project name (overrides demo_config)"
+    )
+    parser.add_argument(
+        "--dictionary_width", type=int, help="Single dictionary width (overrides demo_config.dictionary_widths)"
+    )
 
     args = parser.parse_args()
     return args
@@ -86,6 +95,8 @@ def run_sae_training(
     save_checkpoints: bool = False,
     buffer_tokens: int = 250_000,
     mixed_dataset: bool = False,
+    wandb_entity: str | None = None,
+    wandb_project: str | None = None,
 ):
     random.seed(demo_config.random_seeds[0])
     t.manual_seed(demo_config.random_seeds[0])
@@ -196,7 +207,8 @@ def run_sae_training(
             save_steps=save_steps,
             save_dir=save_dir,
             log_steps=log_steps,
-            wandb_project=demo_config.wandb_project,
+            wandb_entity=wandb_entity if wandb_entity else "",
+            wandb_project=wandb_project if wandb_project else demo_config.wandb_project,
             normalize_activations=True,
             verbose=False,
             autocast_dtype=t.bfloat16,
@@ -354,6 +366,9 @@ if __name__ == "__main__":
         )
     )
 
+    # Use single width if specified, otherwise use all from config
+    dictionary_widths = [args.dictionary_width] if args.dictionary_width else demo_config.dictionary_widths
+
     for layer in args.layers:
         run_sae_training(
             model_name=args.model_name,
@@ -363,12 +378,14 @@ if __name__ == "__main__":
             architectures=args.architectures,
             num_tokens=demo_config.num_tokens,
             random_seeds=demo_config.random_seeds,
-            dictionary_widths=demo_config.dictionary_widths,
+            dictionary_widths=dictionary_widths,
             learning_rates=demo_config.learning_rates,
             dry_run=args.dry_run,
             use_wandb=args.use_wandb,
             save_checkpoints=args.save_checkpoints,
             mixed_dataset=args.mixed_dataset,
+            wandb_entity=args.wandb_entity,
+            wandb_project=args.wandb_project,
         )
 
     ae_paths = utils.get_nested_folders(save_dir)
